@@ -1,0 +1,48 @@
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role ENUM('STUDENT', 'ADMIN') NOT NULL,
+  account_status ENUM('PENDING_VERIFICATION', 'ACTIVE', 'INACTIVE', 'LOCKED') NOT NULL DEFAULT 'PENDING_VERIFICATION',
+  email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS authorized_students (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  student_name VARCHAR(255) NOT NULL,
+  college_email VARCHAR(255) NOT NULL UNIQUE,
+  roll_number VARCHAR(100) NOT NULL UNIQUE,
+  department VARCHAR(100) NOT NULL,
+  academic_year VARCHAR(50) NOT NULL,
+  registration_status ENUM('APPROVED', 'PENDING', 'REJECTED') NOT NULL DEFAULT 'APPROVED'
+);
+
+CREATE TABLE IF NOT EXISTS student_profiles (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL UNIQUE,
+  student_id VARCHAR(100) NOT NULL UNIQUE,
+  phone VARCHAR(50) NOT NULL,
+  department VARCHAR(100) NOT NULL,
+  year VARCHAR(50) NOT NULL,
+  section VARCHAR(50) NOT NULL,
+  CONSTRAINT fk_student_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS email_verifications (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  verification_token_hash VARCHAR(255) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  verified_at DATETIME NULL,
+  UNIQUE KEY uq_user_verification (user_id),
+  CONSTRAINT fk_email_verifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS admin_profiles (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL UNIQUE,
+  full_name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_admin_profiles_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
